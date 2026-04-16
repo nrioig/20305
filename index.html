@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio - Home</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .hero { padding: 80px 0; border-bottom: 1px solid var(--border-color); }
+        .hero h1 { font-size: 3rem; margin-bottom: 10px; }
+        .tech-tags { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
+        .roadmap { margin-top: 40px; }
+        .step { padding: 15px; border-left: 2px solid var(--accent-lime); margin-bottom: 15px; background: var(--bg-card); }
+    </style>
+</head>
+<body>
+    <header></header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <p style="color:var(--accent-lime); font-family:monospace;">Hello, World!</p>
+                <h1>안녕하세요, <br>김래원 입니다.</h1>
+                <a href="(주소 입력)" target="_blank" class="btn-secondary">GitHub 방문하기</a>
+            </div>
+        </section>
+
+        <section class="container" style="padding: 40px 20px;">
+            <h2 style="font-family:monospace; margin-bottom: 20px; color:var(--accent-lime);">> Tech Stack</h2>
+            <div class="tech-tags">
+                <span class="tag">HTML/CSS</span>
+                <span class="tag">JavaScript</span>
+                <span class="tag">React</span>
+                <span class="tag">php</span>
+            </div>
+        </section>
+    </main>
+
+    <footer style="text-align:center; padding: 40px; border-top:1px solid var(--border-color); color:var(--text-muted);">
+        &copy; 2026. raewon All rights reserved.
+    </footer>
+
+    <div class="modal-overlay" id="modal-login">
+        <div class="modal-box">
+            <form id="login-form">
+                <div class="modal-header">
+                    <h3>로그인</h3>
+                    <button type="button" class="close-btn" onclick="closeModal('modal-login')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="error-msg" id="login-error"></p>
+                    <input type="email" name="login_email" placeholder="이메일" required>
+                    <input type="password" name="login_password" placeholder="비밀번호" required>
+                    <button type="submit" class="btn-primary" style="width: 100%;">로그인</button>
+                    <div style="text-align:center; margin-top:15px; font-size:0.9rem;">
+                        <a href="#" onclick="switchModal('modal-login', 'modal-register'); return false;">계정이 없으신가요? 회원가입</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-register">
+        <div class="modal-box">
+            <form id="register-form">
+                <div class="modal-header">
+                    <h3>회원가입</h3>
+                    <button type="button" class="close-btn" onclick="closeModal('modal-register')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="error-msg" id="reg-error"></p>
+                    <input type="email" name="reg_email" placeholder="이메일" required>
+                    <input type="text" name="reg_name" placeholder="닉네임 (표시 이름)" required>
+                    <input type="password" name="reg_pw" placeholder="비밀번호 (6자 이상)" minlength="6" required>
+                    <input type="password" name="reg_pw_confirm" placeholder="비밀번호 확인" required>
+                    <button type="submit" class="btn-primary" style="width: 100%;">가입하기</button>
+                    <div style="text-align:center; margin-top:15px; font-size:0.9rem;">
+                        <a href="#" onclick="switchModal('modal-register', 'modal-login'); return false;">이미 계정이 있으신가요? 로그인</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

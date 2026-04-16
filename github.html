@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>포트폴리오 - GitHub</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header></header>
+    <main class="container">
+        <h2 style="margin: 30px 0;">내 프로젝트 모아보기</h2>
+        <div id="loader" class="spinner"></div>
+        <div id="repo-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;"></div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/github.js"></script>
+</body>
+</html>

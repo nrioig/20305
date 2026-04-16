@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>포트폴리오 - 공부기록</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .filter-btn { padding: 5px 15px; border-radius: 20px; background: var(--bg-hover); border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; }
+        .filter-btn.active { background: var(--accent-lime); color: var(--bg-dark); font-weight: bold; border: none; }
+    </style>
+</head>
+<body>
+    <header></header>
+    <main class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin: 30px 0;">
+            <h2>Today I Learned</h2>
+            <button id="btn-add-til" class="btn-primary">기록하기</button>
+        </div>
+        <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+            <button class="filter-btn active" data-tag="전체">전체</button>
+            <button class="filter-btn" data-tag="HTML/CSS">HTML/CSS</button>
+            <button class="filter-btn" data-tag="JavaScript">JavaScript</button>
+            <button class="filter-btn" data-tag="React">React</button>
+            <button class="filter-btn" data-tag="Backend">Backend</button>
+            <button class="filter-btn" data-tag="기타">기타</button>
+        </div>
+        <div id="til-list" style="display: grid; gap: 15px;"></div>
+    </main>
+
+    <div id="modal-til-write" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>오늘의 공부 기록</h3>
+                <button class="close-btn" onclick="closeModal('modal-til-write')">&times;</button>
+            </div>
+            <form id="til-form">
+                <div class="modal-body">
+                    <input type="text" id="til-date" readonly style="background: #222; color: #888;">
+                    <select id="til-tag" required>
+                        <option value="HTML/CSS">HTML/CSS</option>
+                        <option value="JavaScript">JavaScript</option>
+                        <option value="React">React</option>
+                        <option value="Backend">Backend</option>
+                        <option value="기타">기타</option>
+                    </select>
+                    <textarea id="til-content" placeholder="오늘 무엇을 배웠나요?" style="height: 100px;" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn-primary" style="width: 100%;">기록하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/til.js"></script>
+</body>
+</html>
