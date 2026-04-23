@@ -7,6 +7,9 @@
     <style>
         .filter-btn { padding: 5px 15px; border-radius: 20px; background: var(--bg-hover); border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; }
         .filter-btn.active { background: var(--accent-lime); color: var(--bg-dark); font-weight: bold; border: none; }
+        .preview-img { max-width: 100%; max-height: 200px; margin-top: 10px; border-radius: 4px; display: none; object-fit: contain; background: #000; }
+        .file-hint { font-size: 0.8rem; color: var(--text-muted); margin-top: -10px; margin-bottom: 15px; display: block; }
+        .til-image { width: 100%; max-height: 300px; object-fit: cover; border-radius: 4px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -14,7 +17,7 @@
     <main class="container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin: 30px 0;">
             <h2>Today I Learned</h2>
-            <button id="btn-add-til" class="btn-primary">기록하기</button>
+            <button id="btn-add-til" class="btn-primary" style="display: none;">기록하기</button>
         </div>
         <div style="margin-bottom: 20px; display: flex; gap: 10px;">
             <button class="filter-btn active" data-tag="전체">전체</button>
@@ -43,10 +46,43 @@
                         <option value="Backend">Backend</option>
                         <option value="기타">기타</option>
                     </select>
-                    <textarea id="til-content" placeholder="오늘 무엇을 배웠나요?" style="height: 100px;" required></textarea>
+                    <input type="file" id="til-image" accept=".jpg, .jpeg, .png, .gif, .webp" style="margin-bottom: 5px;">
+                    <span class="file-hint">최대 5MB. 허용: jpg, png, gif, webp</span>
+                    <img id="til-image-preview" class="preview-img">
+                    <textarea id="til-content" placeholder="오늘 무엇을 배웠나요?" style="height: 100px; margin-top:15px;" required></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn-primary" style="width: 100%;">기록하기</button>
+                    <button type="submit" id="btn-submit-write" class="btn-primary" style="width: 100%;">기록하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-til-edit" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>공부 기록 수정</h3>
+                <button class="close-btn" onclick="closeModal('modal-til-edit')">&times;</button>
+            </div>
+            <form id="til-edit-form">
+                <div class="modal-body">
+                    <input type="hidden" id="edit-til-id">
+                    <input type="hidden" id="edit-old-image-url">
+                    <select id="edit-til-tag" required>
+                        <option value="HTML/CSS">HTML/CSS</option>
+                        <option value="JavaScript">JavaScript</option>
+                        <option value="React">React</option>
+                        <option value="Backend">Backend</option>
+                        <option value="기타">기타</option>
+                    </select>
+                    <input type="file" id="edit-til-image" accept=".jpg, .jpeg, .png, .gif, .webp" style="margin-bottom: 5px;">
+                    <span class="file-hint">새 이미지 선택 시 기존 이미지는 삭제됩니다. (최대 5MB)</span>
+                    <img id="edit-til-image-preview" class="preview-img">
+                    <textarea id="edit-til-content" style="height: 100px; margin-top:15px;" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modal-til-edit')">취소</button>
+                    <button type="submit" id="btn-submit-edit" class="btn-primary">수정완료</button>
                 </div>
             </form>
         </div>

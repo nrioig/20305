@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const GITHUB_USERNAME = '본인아이디입력'; // TODO: 본인 깃허브 아이디로 변경하세요!
+    const GITHUB_USERNAME = 'nrioig'; // TODO: 본인 깃허브 아이디로 변경하세요!
     fetchRepos(GITHUB_USERNAME);
 });
 

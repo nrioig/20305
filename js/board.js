@@ -1,85 +1,178 @@
 let currentPosts = [];
+let loggedInUser = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadData();
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: { user } } = await sb.auth.getUser();
+    loggedInUser = user;
 
-    document.getElementById('btn-write').addEventListener('click', async () => {
-        const user = await getUser();
-        if(!user) { openModal('modal-login'); return; }
+    loadPosts();
+
+    document.getElementById('btn-add-post').addEventListener('click', () => {
+        document.getElementById('board-write-form').reset();
         
-        document.getElementById('board-form').reset();
-        document.getElementById('board-id').value = '';
-        document.getElementById('write-modal-title').innerText = '새 글 작성';
+        const authorWrapper = document.getElementById('board-author-wrapper');
+        if (loggedInUser) {
+            authorWrapper.style.display = 'none';
+        } else {
+            authorWrapper.style.display = 'block';
+        }
+        
         openModal('modal-board-write');
     });
 
-    document.getElementById('board-form').addEventListener('submit', async (e) => {
+    document.getElementById('board-write-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const user = await getUser();
-        const id = document.getElementById('board-id').value;
+        
         const title = document.getElementById('board-title').value;
         const content = document.getElementById('board-content').value;
+        const submitBtn = document.getElementById('btn-submit-write');
+        
+        let author_id = null;
+        let author_name = '익명';
 
-        if(id) {
-            await sb.from('posts').update({ title, content, updated_at: new Date() }).eq('id', id);
-            showToast("수정되었습니다.");
+        if (loggedInUser) {
+            author_id = loggedInUser.id;
+            author_name = loggedInUser.user_metadata?.username || '회원';
         } else {
-            await sb.from('posts').insert({ title, content, author_id: user.id, author_name: user.user_metadata.username || 'User' });
-            showToast("등록되었습니다.");
+            const inputName = document.getElementById('board-author-name').value.trim();
+            if (inputName) author_name = inputName;
         }
-        closeModal('modal-board-write');
-        loadData();
+
+        try {
+            submitBtn.disabled = true;
+            submitBtn.innerText = '등록 중...';
+
+            await sb.from('posts').insert({
+                title,
+                content,
+                author_id,
+                author_name
+            });
+
+            closeModal('modal-board-write');
+            showToast('게시글이 등록되었습니다.');
+            loadPosts();
+        } catch (error) {
+            console.error(error);
+            showToast('등록에 실패했습니다.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '등록하기';
+        }
+    });
+
+    document.getElementById('board-edit-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('edit-board-id').value;
+        const title = document.getElementById('edit-board-title').value;
+        const content = document.getElementById('edit-board-content').value;
+        const submitBtn = document.getElementById('btn-submit-edit');
+
+        try {
+            submitBtn.disabled = true;
+            submitBtn.innerText = '수정 중...';
+
+            await sb.from('posts').update({ title, content }).eq('id', id);
+
+            closeModal('modal-board-edit');
+            showToast('게시글이 수정되었습니다.');
+            
+            closeModal('modal-board-detail');
+            loadPosts();
+        } catch (error) {
+            console.error(error);
+            showToast('수정에 실패했습니다.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '수정완료';
+        }
     });
 });
 
-async function loadData() {
+async function loadPosts() {
     const { data, error } = await sb.from('posts').select('*').order('created_at', { ascending: false });
-    if(error) return;
+    if (error) {
+        console.error('목록 불러오기 실패:', error);
+        return;
+    }
+
     currentPosts = data;
-    
     const tbody = document.getElementById('board-list');
     tbody.innerHTML = '';
-    data.forEach((post, i) => {
+
+    data.forEach(post => {
         const tr = document.createElement('tr');
-        tr.style.cursor = 'pointer';
-        tr.innerHTML = `<td>${data.length - i}</td><td>${post.title}</td><td>${post.author_name}</td><td>${new Date(post.created_at).toLocaleDateString()}</td>`;
         tr.onclick = () => openDetail(post.id);
+        
+        const displayName = post.author_id ? post.author_name : `${post.author_name} (비회원)`;
+        const dateStr = new Date(post.created_at).toLocaleDateString();
+
+        tr.innerHTML = `
+            <td>${post.title}</td>
+            <td>${displayName}</td>
+            <td>${dateStr}</td>
+        `;
         tbody.appendChild(tr);
     });
 }
 
-async function openDetail(id) {
-    const post = currentPosts.find(p => p.id === id);
-    if(!post) return;
+const canDelete = (post) => {
+    if (!post.author_id) return true;
+    return post.author_id === loggedInUser?.id;
+};
 
+const canEdit = (post) => {
+    if (!post.author_id) return false;
+    return post.author_id === loggedInUser?.id;
+};
+
+function openDetail(id) {
+    const post = currentPosts.find(p => p.id === id);
+    if (!post) return;
+
+    const displayName = post.author_id ? post.author_name : `${post.author_name} (비회원)`;
+    
     document.getElementById('detail-title').innerText = post.title;
-    document.getElementById('detail-meta').innerText = `${post.author_name} | ${new Date(post.created_at).toLocaleString()}`;
+    document.getElementById('detail-meta').innerText = `${displayName} | ${new Date(post.created_at).toLocaleString()}`;
     document.getElementById('detail-content').innerText = post.content;
 
-    const user = await getUser();
-    const footer = document.getElementById('detail-footer');
-    footer.innerHTML = `<button class="btn-secondary" onclick="closeModal('modal-board-detail')">닫기</button>`;
-    
-    if(user && user.id === post.author_id) {
-        footer.innerHTML += `<button class="btn-secondary" onclick="openEdit('${post.id}')">수정</button><button class="btn-danger" onclick="deletePost('${post.id}')">삭제</button>`;
+    const btnEdit = document.getElementById('btn-edit-post');
+    const btnDelete = document.getElementById('btn-delete-post');
+
+    if (canEdit(post)) {
+        btnEdit.style.display = 'inline-block';
+        btnEdit.onclick = () => {
+            document.getElementById('edit-board-id').value = post.id;
+            document.getElementById('edit-board-title').value = post.title;
+            document.getElementById('edit-board-content').value = post.content;
+            openModal('modal-board-edit');
+        };
+    } else {
+        btnEdit.style.display = 'none';
     }
+
+    if (canDelete(post)) {
+        btnDelete.style.display = 'inline-block';
+        btnDelete.onclick = () => deletePost(post.id);
+    } else {
+        btnDelete.style.display = 'none';
+    }
+
     openModal('modal-board-detail');
 }
 
-function openEdit(id) {
-    const post = currentPosts.find(p => p.id === id);
-    closeModal('modal-board-detail');
-    document.getElementById('board-id').value = post.id;
-    document.getElementById('board-title').value = post.title;
-    document.getElementById('board-content').value = post.content;
-    document.getElementById('write-modal-title').innerText = '글 수정';
-    openModal('modal-board-write');
-}
-
 async function deletePost(id) {
-    if(!confirm('정말 삭제하시겠습니까?')) return;
-    await sb.from('posts').delete().eq('id', id);
-    closeModal('modal-board-detail');
-    showToast("삭제되었습니다.");
-    loadData();
+    if (!confirm('이 게시글을 정말 삭제하시겠습니까?')) return;
+
+    try {
+        const { error } = await sb.from('posts').delete().eq('id', id);
+        if (error) throw error;
+        
+        showToast('삭제되었습니다.');
+        closeModal('modal-board-detail');
+        loadPosts();
+    } catch (error) {
+        console.error(error);
+        showToast('삭제 중 오류가 발생했습니다. 권한이 없습니다.', 'error');
+    }
 }
